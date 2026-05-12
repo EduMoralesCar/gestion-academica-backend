@@ -6,5 +6,6 @@ pydantic[email]>=2.0.0
 python-dotenv>=1.0.0
 supabase>=2.0.0
 passlib[bcrypt]
+bcrypt==3.2.0
 python-jose[cryptography]
 python-multipart>=0.0.6
