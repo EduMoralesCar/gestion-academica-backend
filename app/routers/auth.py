@@ -85,6 +85,22 @@ def obtener_perfil(current_user: models.User = Depends(auth.get_current_user)):
     # Este endpoint está protegido. Solo funciona si envías un Token válido.
     return current_user
 
+@router.put("/change-password", response_model=schemas.PasswordResetMessage)
+def cambiar_password_perfil(
+    request: schemas.ChangePasswordRequest,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    if not auth.verify_password(request.contrasenia_actual, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="La contrasenia actual es incorrecta")
+
+    if auth.verify_password(request.nueva_contrasenia, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="La nueva contrasenia debe ser diferente a la actual")
+
+    current_user.hashed_password = auth.get_password_hash(request.nueva_contrasenia)
+    db.commit()
+    return {"message": "Contrasena actualizada correctamente"}
+
 @router.post("/forgot-password", response_model=schemas.PasswordResetMessage)
 def solicitar_recuperacion_password(request: schemas.ForgotPasswordRequest, db: Session = Depends(database.get_db)):
     user = db.query(models.User).filter(models.User.email == request.email).first()
