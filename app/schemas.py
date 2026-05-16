@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 from datetime import datetime
 from enum import Enum
@@ -135,6 +135,39 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "email": "estudiante@nuevaschool.pe"
+                }
+            ]
+        }
+    }
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    codigo: str = Field(..., min_length=6, max_length=6, pattern=r"^\d{6}$")
+    nueva_contrasenia: str = Field(..., min_length=6)
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "email": "estudiante@nuevaschool.pe",
+                    "codigo": "123456",
+                    "nueva_contrasenia": "nuevaClave123"
+                }
+            ]
+        }
+    }
+
+class PasswordResetMessage(BaseModel):
+    message: str
 
 class ContenidoSemanaBase(BaseModel):
     curso_id: str
