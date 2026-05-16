@@ -42,6 +42,7 @@ class User(Base):
     # Relaciones
     asignaciones_docente = relationship("AsignacionDocente", back_populates="docente")
     matriculas = relationship("Matricula", back_populates="estudiante")
+    codigos_recuperacion = relationship("CodigoRecuperacionContrasena", back_populates="usuario")
 
 class Curso(Base):
     __tablename__ = "cursos"
@@ -148,3 +149,16 @@ class Asistencia(Base):
 
     # Relaciones
     curso = relationship("Curso", back_populates="asistencias")
+
+class CodigoRecuperacionContrasena(Base):
+    __tablename__ = "codigos_recuperacion_contrasena"
+
+    id = Column(String, primary_key=True, index=True)
+    usuario_id = Column(String, ForeignKey("users.id"), nullable=False)
+    codigo_hash = Column(String, nullable=False)
+    estado = Column(String, nullable=False, default="ACTIVO")
+    fecha_expiracion = Column(DateTime(timezone=True), nullable=False)
+    fecha_uso = Column(DateTime(timezone=True), nullable=True)
+    fecha_creacion = Column(DateTime(timezone=True), server_default=func.now())
+
+    usuario = relationship("User", back_populates="codigos_recuperacion")
