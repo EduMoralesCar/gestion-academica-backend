@@ -169,6 +169,21 @@ class ResetPasswordRequest(BaseModel):
 class PasswordResetMessage(BaseModel):
     message: str
 
+class ChangePasswordRequest(BaseModel):
+    contrasenia_actual: str = Field(..., min_length=6)
+    nueva_contrasenia: str = Field(..., min_length=6)
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "contrasenia_actual": "claveActual123",
+                    "nueva_contrasenia": "nuevaClave123"
+                }
+            ]
+        }
+    }
+
 class ContenidoSemanaBase(BaseModel):
     curso_id: str
     semana_numero: int
