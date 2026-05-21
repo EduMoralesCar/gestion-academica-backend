@@ -21,6 +21,8 @@ def matricular_estudiante(matricula: schemas.MatriculaCreate, db: Session = Depe
     estudiante = matriculas_service.obtener_estudiante(db, matricula.estudiante_id)
     if not estudiante:
         raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    if estudiante.rol != models.UserRole.ESTUDIANTE:
+        raise HTTPException(status_code=400, detail="El usuario indicado no tiene rol de estudiante")
 
     curso = matriculas_service.obtener_curso(db, matricula.curso_id)
     if not curso:
