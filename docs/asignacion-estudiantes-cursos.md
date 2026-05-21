@@ -22,5 +22,25 @@ py -3 -m pytest tests
 Resultado:
 
 - Compilacion correcta de `app` y `tests`.
-- Pruebas de servicios de matriculas: 3 aprobadas.
+- Pruebas de servicios de matriculas: 4 aprobadas.
 - Advertencia existente de SQLAlchemy por `declarative_base`, sin impacto en esta funcionalidad.
+
+## Endpoints implementados
+
+- `POST /api/matriculas/`: asigna un estudiante a un curso.
+- `GET /api/matriculas/curso/{curso_id}/estudiantes`: lista estudiantes activos del curso.
+- `DELETE /api/matriculas/curso/{curso_id}/estudiantes/{estudiante_id}`: retira al estudiante del curso cambiando la matricula a estado `retirado`.
+
+## Validaciones agregadas
+
+- Solo usuarios `ADMIN` pueden asignar, actualizar o retirar matriculas.
+- El estudiante debe existir.
+- El usuario indicado debe tener rol `ESTUDIANTE`.
+- El curso debe existir.
+- No se permite duplicar una matricula activa del mismo estudiante en el mismo curso.
+- Si una matricula retirada vuelve a asignarse, se reactiva el registro existente para evitar duplicados historicos.
+- El retiro valida estudiante, curso y matricula activa antes de cambiar el estado.
+
+## Preparacion para PR
+
+La rama `feature/asignacion-estudiante-endpoints` queda preparada para Pull Request hacia `dev`. No se realizaron merges, rebases ni cambios sobre `dev` o `main`.
