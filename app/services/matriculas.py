@@ -4,6 +4,10 @@ import uuid
 from .. import models
 
 
+def obtener_estudiante(db: Session, estudiante_id: str):
+    return db.query(models.User).filter(models.User.id == estudiante_id).first()
+
+
 def obtener_matricula(db: Session, matricula_id: str):
     return db.query(models.Matricula).filter(models.Matricula.id == matricula_id).first()
 

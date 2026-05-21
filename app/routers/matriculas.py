@@ -17,6 +17,10 @@ def obtener_matriculas(db: Session = Depends(database.get_db), current_user: mod
 def matricular_estudiante(matricula: schemas.MatriculaCreate, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
     if current_user.rol != models.UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Solo los administradores pueden matricular estudiantes")
+
+    estudiante = matriculas_service.obtener_estudiante(db, matricula.estudiante_id)
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
         
     return matriculas_service.crear_matricula(db, matricula.estudiante_id, matricula.curso_id)
 
