@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-import uuid
 from typing import List
 from .. import models, schemas, auth, database
+from ..services import matriculas as matriculas_service
 
 router = APIRouter(
     prefix="/api/matriculas",
@@ -18,15 +18,7 @@ def matricular_estudiante(matricula: schemas.MatriculaCreate, db: Session = Depe
     if current_user.rol != models.UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Solo los administradores pueden matricular estudiantes")
         
-    nueva_matricula = models.Matricula(
-        id=str(uuid.uuid4()),
-        estudiante_id=matricula.estudiante_id,
-        curso_id=matricula.curso_id
-    )
-    db.add(nueva_matricula)
-    db.commit()
-    db.refresh(nueva_matricula)
-    return nueva_matricula
+    return matriculas_service.crear_matricula(db, matricula.estudiante_id, matricula.curso_id)
 
 @router.put("/{matricula_id}", response_model=schemas.MatriculaResponse)
 def actualizar_matricula(matricula_id: str, matricula: schemas.MatriculaCreate, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
