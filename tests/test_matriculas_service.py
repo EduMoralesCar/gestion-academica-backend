@@ -76,3 +76,16 @@ def test_retirar_matricula_conserva_registro_como_retirado():
 
     assert retirada.estado == models.EstadoMatricula.retirado
     assert matricula_activa is None
+
+
+def test_reactivar_matricula_retirada():
+    db = crear_db_prueba()
+    crear_estudiante(db)
+    crear_curso(db)
+    matricula = matriculas_service.crear_matricula(db, "estudiante-1", "curso-1")
+    retirada = matriculas_service.retirar_matricula(db, matricula)
+
+    reactivada = matriculas_service.reactivar_matricula(db, retirada)
+
+    assert reactivada.id == matricula.id
+    assert reactivada.estado == models.EstadoMatricula.activo

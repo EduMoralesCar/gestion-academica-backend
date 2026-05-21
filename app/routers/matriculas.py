@@ -82,6 +82,10 @@ def matricular_estudiante(matricula: schemas.MatriculaCreate, db: Session = Depe
     if matricula_existente:
         raise HTTPException(status_code=400, detail="El estudiante ya se encuentra matriculado en este curso")
 
+    matricula_retirada = matriculas_service.obtener_matricula_retirada(db, matricula.estudiante_id, matricula.curso_id)
+    if matricula_retirada:
+        return matriculas_service.reactivar_matricula(db, matricula_retirada)
+
     return matriculas_service.crear_matricula(db, matricula.estudiante_id, matricula.curso_id)
 
 
