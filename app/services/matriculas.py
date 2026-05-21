@@ -41,3 +41,10 @@ def crear_matricula(db: Session, estudiante_id: str, curso_id: str):
     db.commit()
     db.refresh(nueva_matricula)
     return nueva_matricula
+
+
+def retirar_matricula(db: Session, matricula: models.Matricula):
+    matricula.estado = models.EstadoMatricula.retirado
+    db.commit()
+    db.refresh(matricula)
+    return matricula

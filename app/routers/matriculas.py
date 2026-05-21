@@ -83,3 +83,14 @@ def actualizar_matricula(matricula_id: str, matricula: schemas.MatriculaCreate, 
     db.commit()
     db.refresh(db_matricula)
     return db_matricula
+
+@router.delete("/curso/{curso_id}/estudiantes/{estudiante_id}", response_model=schemas.MatriculaResponse)
+def retirar_estudiante_de_curso(curso_id: str, estudiante_id: str, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
+    if current_user.rol != models.UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo los administradores pueden retirar estudiantes de cursos")
+
+    matricula = matriculas_service.obtener_matricula_activa(db, estudiante_id, curso_id)
+    if not matricula:
+        raise HTTPException(status_code=404, detail="Matrícula activa no encontrada")
+
+    return matriculas_service.retirar_matricula(db, matricula)
