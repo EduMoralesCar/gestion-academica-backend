@@ -123,9 +123,19 @@ class MatriculaCreate(BaseModel):
 class MatriculaResponse(MatriculaCreate):
     id: str
     fecha_matricula: datetime
+    estado: str
     
     class Config:
         from_attributes = True
+
+class EstudianteMatriculadoResponse(UserResponse):
+    matricula_id: str
+    fecha_matricula: datetime
+    estado_matricula: str
+
+class CursoEstudiantesResponse(BaseModel):
+    curso: CursoResponse
+    estudiantes: List[EstudianteMatriculadoResponse]
 
 # --- Auth Schemas ---
 class Token(BaseModel):
