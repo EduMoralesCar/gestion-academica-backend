@@ -9,15 +9,29 @@ router = APIRouter(
     tags=["Matriculas"]
 )
 
+def validar_admin(current_user: models.User, accion: str):
+    if current_user.rol != models.UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail=f"Solo los administradores pueden {accion}")
+
+def obtener_estudiante_o_404(db: Session, estudiante_id: str):
+    estudiante = matriculas_service.obtener_estudiante(db, estudiante_id)
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    return estudiante
+
+def obtener_curso_o_404(db: Session, curso_id: str):
+    curso = matriculas_service.obtener_curso(db, curso_id)
+    if not curso:
+        raise HTTPException(status_code=404, detail="Curso no encontrado")
+    return curso
+
 @router.get("/", response_model=List[schemas.MatriculaResponse])
 def obtener_matriculas(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
     return db.query(models.Matricula).all()
 
 @router.get("/curso/{curso_id}/estudiantes", response_model=schemas.CursoEstudiantesResponse)
 def obtener_estudiantes_por_curso(curso_id: str, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
-    curso = matriculas_service.obtener_curso(db, curso_id)
-    if not curso:
-        raise HTTPException(status_code=404, detail="Curso no encontrado")
+    curso = obtener_curso_o_404(db, curso_id)
 
     matriculas = matriculas_service.listar_matriculas_activas_por_curso(db, curso_id)
     estudiantes = [
@@ -49,18 +63,13 @@ def obtener_estudiantes_por_curso(curso_id: str, db: Session = Depends(database.
 
 @router.post("/", response_model=schemas.MatriculaResponse)
 def matricular_estudiante(matricula: schemas.MatriculaCreate, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
-    if current_user.rol != models.UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail="Solo los administradores pueden matricular estudiantes")
+    validar_admin(current_user, "matricular estudiantes")
 
-    estudiante = matriculas_service.obtener_estudiante(db, matricula.estudiante_id)
-    if not estudiante:
-        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+    estudiante = obtener_estudiante_o_404(db, matricula.estudiante_id)
     if estudiante.rol != models.UserRole.ESTUDIANTE:
         raise HTTPException(status_code=400, detail="El usuario indicado no tiene rol de estudiante")
 
-    curso = matriculas_service.obtener_curso(db, matricula.curso_id)
-    if not curso:
-        raise HTTPException(status_code=404, detail="Curso no encontrado")
+    obtener_curso_o_404(db, matricula.curso_id)
 
     matricula_existente = matriculas_service.obtener_matricula_activa(db, matricula.estudiante_id, matricula.curso_id)
     if matricula_existente:
@@ -86,16 +95,10 @@ def actualizar_matricula(matricula_id: str, matricula: schemas.MatriculaCreate, 
 
 @router.delete("/curso/{curso_id}/estudiantes/{estudiante_id}", response_model=schemas.MatriculaResponse)
 def retirar_estudiante_de_curso(curso_id: str, estudiante_id: str, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
-    if current_user.rol != models.UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail="Solo los administradores pueden retirar estudiantes de cursos")
+    validar_admin(current_user, "retirar estudiantes de cursos")
 
-    estudiante = matriculas_service.obtener_estudiante(db, estudiante_id)
-    if not estudiante:
-        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
-
-    curso = matriculas_service.obtener_curso(db, curso_id)
-    if not curso:
-        raise HTTPException(status_code=404, detail="Curso no encontrado")
+    obtener_estudiante_o_404(db, estudiante_id)
+    obtener_curso_o_404(db, curso_id)
 
     matricula = matriculas_service.obtener_matricula_activa(db, estudiante_id, curso_id)
     if not matricula:
