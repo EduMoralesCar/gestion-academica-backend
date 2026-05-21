@@ -24,6 +24,13 @@ def obtener_matricula_activa(db: Session, estudiante_id: str, curso_id: str):
     ).first()
 
 
+def listar_matriculas_activas_por_curso(db: Session, curso_id: str):
+    return db.query(models.Matricula).filter(
+        models.Matricula.curso_id == curso_id,
+        models.Matricula.estado == models.EstadoMatricula.activo
+    ).all()
+
+
 def crear_matricula(db: Session, estudiante_id: str, curso_id: str):
     nueva_matricula = models.Matricula(
         id=str(uuid.uuid4()),

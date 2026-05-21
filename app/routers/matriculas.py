@@ -13,6 +13,35 @@ router = APIRouter(
 def obtener_matriculas(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
     return db.query(models.Matricula).all()
 
+@router.get("/curso/{curso_id}/estudiantes", response_model=List[schemas.EstudianteMatriculadoResponse])
+def obtener_estudiantes_por_curso(curso_id: str, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
+    curso = matriculas_service.obtener_curso(db, curso_id)
+    if not curso:
+        raise HTTPException(status_code=404, detail="Curso no encontrado")
+
+    matriculas = matriculas_service.listar_matriculas_activas_por_curso(db, curso_id)
+    return [
+        schemas.EstudianteMatriculadoResponse(
+            id=matricula.estudiante.id,
+            email=matricula.estudiante.email,
+            nombre=matricula.estudiante.nombre,
+            apellido=matricula.estudiante.apellido,
+            rol=matricula.estudiante.rol,
+            codigo=matricula.estudiante.codigo,
+            carrera=matricula.estudiante.carrera,
+            ciclo=matricula.estudiante.ciclo,
+            especialidad=matricula.estudiante.especialidad,
+            departamento=matricula.estudiante.departamento,
+            nivel_acceso=matricula.estudiante.nivel_acceso,
+            createdAt=matricula.estudiante.createdAt,
+            profilePicture=matricula.estudiante.profilePicture,
+            matricula_id=matricula.id,
+            fecha_matricula=matricula.fecha_matricula,
+            estado_matricula=matricula.estado
+        )
+        for matricula in matriculas
+    ]
+
 @router.post("/", response_model=schemas.MatriculaResponse)
 def matricular_estudiante(matricula: schemas.MatriculaCreate, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
     if current_user.rol != models.UserRole.ADMIN:
