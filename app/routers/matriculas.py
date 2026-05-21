@@ -21,6 +21,10 @@ def matricular_estudiante(matricula: schemas.MatriculaCreate, db: Session = Depe
     estudiante = matriculas_service.obtener_estudiante(db, matricula.estudiante_id)
     if not estudiante:
         raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+
+    curso = matriculas_service.obtener_curso(db, matricula.curso_id)
+    if not curso:
+        raise HTTPException(status_code=404, detail="Curso no encontrado")
         
     return matriculas_service.crear_matricula(db, matricula.estudiante_id, matricula.curso_id)
 
