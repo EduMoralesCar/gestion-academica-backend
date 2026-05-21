@@ -87,13 +87,22 @@ def matricular_estudiante(matricula: schemas.MatriculaCreate, db: Session = Depe
 
 @router.put("/{matricula_id}", response_model=schemas.MatriculaResponse)
 def actualizar_matricula(matricula_id: str, matricula: schemas.MatriculaCreate, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
-    if current_user.rol != models.UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail="Solo los administradores pueden actualizar matrículas")
-        
-    db_matricula = db.query(models.Matricula).filter(models.Matricula.id == matricula_id).first()
+    validar_admin(current_user, "actualizar matrículas")
+
+    db_matricula = matriculas_service.obtener_matricula(db, matricula_id)
     if not db_matricula:
         raise HTTPException(status_code=404, detail="Matrícula no encontrada")
-        
+
+    estudiante = obtener_estudiante_o_404(db, matricula.estudiante_id)
+    if estudiante.rol != models.UserRole.ESTUDIANTE:
+        raise HTTPException(status_code=400, detail="El usuario indicado no tiene rol de estudiante")
+
+    obtener_curso_o_404(db, matricula.curso_id)
+
+    matricula_existente = matriculas_service.obtener_matricula_activa(db, matricula.estudiante_id, matricula.curso_id)
+    if matricula_existente and matricula_existente.id != matricula_id:
+        raise HTTPException(status_code=400, detail="El estudiante ya se encuentra matriculado en este curso")
+
     db_matricula.estudiante_id = matricula.estudiante_id
     db_matricula.curso_id = matricula.curso_id
     
