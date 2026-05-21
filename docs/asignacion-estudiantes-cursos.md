@@ -9,3 +9,18 @@ La relacion entre estudiantes y cursos ya existe mediante el modelo `Matricula`,
 Los estudiantes se representan como usuarios con rol `ESTUDIANTE`. Los cursos se representan con el modelo `Curso`. La ruta actual `/api/matriculas` permite crear y actualizar matriculas, pero no valida existencia de estudiante, existencia de curso, rol del estudiante, duplicados ni retiro seguro.
 
 La implementacion de Persona 2 debe extender la logica existente de matriculas y mantener compatibilidad con el frontend actual.
+
+## Validacion local
+
+Comandos ejecutados:
+
+```bash
+py -3 -m compileall app tests
+py -3 -m pytest tests
+```
+
+Resultado:
+
+- Compilacion correcta de `app` y `tests`.
+- Pruebas de servicios de matriculas: 3 aprobadas.
+- Advertencia existente de SQLAlchemy por `declarative_base`, sin impacto en esta funcionalidad.
