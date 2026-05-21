@@ -89,6 +89,14 @@ def retirar_estudiante_de_curso(curso_id: str, estudiante_id: str, db: Session =
     if current_user.rol != models.UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Solo los administradores pueden retirar estudiantes de cursos")
 
+    estudiante = matriculas_service.obtener_estudiante(db, estudiante_id)
+    if not estudiante:
+        raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+
+    curso = matriculas_service.obtener_curso(db, curso_id)
+    if not curso:
+        raise HTTPException(status_code=404, detail="Curso no encontrado")
+
     matricula = matriculas_service.obtener_matricula_activa(db, estudiante_id, curso_id)
     if not matricula:
         raise HTTPException(status_code=404, detail="Matrícula activa no encontrada")
