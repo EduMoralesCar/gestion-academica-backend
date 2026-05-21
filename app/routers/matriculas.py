@@ -13,14 +13,14 @@ router = APIRouter(
 def obtener_matriculas(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
     return db.query(models.Matricula).all()
 
-@router.get("/curso/{curso_id}/estudiantes", response_model=List[schemas.EstudianteMatriculadoResponse])
+@router.get("/curso/{curso_id}/estudiantes", response_model=schemas.CursoEstudiantesResponse)
 def obtener_estudiantes_por_curso(curso_id: str, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
     curso = matriculas_service.obtener_curso(db, curso_id)
     if not curso:
         raise HTTPException(status_code=404, detail="Curso no encontrado")
 
     matriculas = matriculas_service.listar_matriculas_activas_por_curso(db, curso_id)
-    return [
+    estudiantes = [
         schemas.EstudianteMatriculadoResponse(
             id=matricula.estudiante.id,
             email=matricula.estudiante.email,
@@ -41,6 +41,11 @@ def obtener_estudiantes_por_curso(curso_id: str, db: Session = Depends(database.
         )
         for matricula in matriculas
     ]
+    return {
+        "curso": curso,
+        "estudiantes": estudiantes,
+        "total": len(estudiantes)
+    }
 
 @router.post("/", response_model=schemas.MatriculaResponse)
 def matricular_estudiante(matricula: schemas.MatriculaCreate, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):

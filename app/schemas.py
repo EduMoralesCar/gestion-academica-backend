@@ -136,6 +136,7 @@ class EstudianteMatriculadoResponse(UserResponse):
 class CursoEstudiantesResponse(BaseModel):
     curso: CursoResponse
     estudiantes: List[EstudianteMatriculadoResponse]
+    total: int
 
 # --- Auth Schemas ---
 class Token(BaseModel):
