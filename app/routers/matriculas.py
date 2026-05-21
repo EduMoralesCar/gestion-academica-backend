@@ -25,6 +25,10 @@ def matricular_estudiante(matricula: schemas.MatriculaCreate, db: Session = Depe
     curso = matriculas_service.obtener_curso(db, matricula.curso_id)
     if not curso:
         raise HTTPException(status_code=404, detail="Curso no encontrado")
+
+    matricula_existente = matriculas_service.obtener_matricula_activa(db, matricula.estudiante_id, matricula.curso_id)
+    if matricula_existente:
+        raise HTTPException(status_code=400, detail="El estudiante ya se encuentra matriculado en este curso")
         
     return matriculas_service.crear_matricula(db, matricula.estudiante_id, matricula.curso_id)
 
