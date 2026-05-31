@@ -39,7 +39,8 @@ def send_password_reset_code(to_email: str, code: str, user_name: str) -> None:
         url = "https://api.resend.com/emails"
         headers = {
             "Authorization": f"Bearer {RESEND_API_KEY}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         }
         
         # Resend requiere enviar desde 'onboarding@resend.dev' en el plan gratuito/sandbox
@@ -82,7 +83,8 @@ def send_password_reset_code(to_email: str, code: str, user_name: str) -> None:
         headers = {
             "api-key": BREVO_API_KEY,
             "Content-Type": "application/json",
-            "Accept": "application/json"
+            "Accept": "application/json",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         }
         data = {
             "sender": {"name": SMTP_FROM_NAME, "email": SMTP_FROM_EMAIL},
