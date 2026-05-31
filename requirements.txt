@@ -9,3 +9,4 @@ passlib[bcrypt]
 bcrypt==3.2.0
 python-jose[cryptography]
 python-multipart>=0.0.6
+pytest>=8.0.0
