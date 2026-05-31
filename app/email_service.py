@@ -2,6 +2,7 @@ import os
 import smtplib
 import ssl
 import urllib.request
+import urllib.error
 import json
 from email.message import EmailMessage
 from dotenv import load_dotenv
@@ -55,14 +56,24 @@ def send_password_reset_code(to_email: str, code: str, user_name: str) -> None:
             "subject": subject,
             "text": content
         }
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(data).encode("utf-8"),
-            headers=headers,
-            method="POST"
-        )
-        with urllib.request.urlopen(req) as response:
-            response.read()
+        try:
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(data).encode("utf-8"),
+                headers=headers,
+                method="POST"
+            )
+            with urllib.request.urlopen(req) as response:
+                response.read()
+        except urllib.error.HTTPError as he:
+            try:
+                error_body = he.read().decode("utf-8")
+                print("--- RESEND API ERROR DETAILS ---")
+                print(f"Status Code: {he.code}")
+                print(f"Response Body: {error_body}")
+            except Exception:
+                pass
+            raise he
         return
 
     # 2. Brevo (Sendinblue) HTTP API (Puerto 443 - Nunca bloqueado en la nube)
@@ -79,14 +90,24 @@ def send_password_reset_code(to_email: str, code: str, user_name: str) -> None:
             "subject": subject,
             "textContent": content
         }
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(data).encode("utf-8"),
-            headers=headers,
-            method="POST"
-        )
-        with urllib.request.urlopen(req) as response:
-            response.read()
+        try:
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(data).encode("utf-8"),
+                headers=headers,
+                method="POST"
+            )
+            with urllib.request.urlopen(req) as response:
+                response.read()
+        except urllib.error.HTTPError as he:
+            try:
+                error_body = he.read().decode("utf-8")
+                print("--- BREVO API ERROR DETAILS ---")
+                print(f"Status Code: {he.code}")
+                print(f"Response Body: {error_body}")
+            except Exception:
+                pass
+            raise he
         return
 
     # 3. SMTP clásico (Gmail, etc. - Funciona en local, pero suele estar bloqueado en servidores gratuitos como Render)
