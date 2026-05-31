@@ -40,7 +40,15 @@ def send_password_reset_code(to_email: str, code: str, user_name: str) -> None:
             "Authorization": f"Bearer {RESEND_API_KEY}",
             "Content-Type": "application/json"
         }
-        sender_email = SMTP_FROM_EMAIL if SMTP_FROM_EMAIL and "@" in SMTP_FROM_EMAIL else "onboarding@resend.dev"
+        
+        # Resend requiere enviar desde 'onboarding@resend.dev' en el plan gratuito/sandbox
+        # a menos que tengas un dominio propio verificado (no se permiten correos públicos como Gmail).
+        sender_email = "onboarding@resend.dev"
+        if SMTP_FROM_EMAIL and "@" in SMTP_FROM_EMAIL:
+            domain = SMTP_FROM_EMAIL.split("@")[-1].lower()
+            if domain not in ["gmail.com", "hotmail.com", "outlook.com", "yahoo.com", "live.com"]:
+                sender_email = SMTP_FROM_EMAIL
+
         data = {
             "from": f"{SMTP_FROM_NAME} <{sender_email}>",
             "to": [recipient],
