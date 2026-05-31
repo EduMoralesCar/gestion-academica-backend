@@ -127,7 +127,11 @@ def solicitar_recuperacion_password(request: schemas.ForgotPasswordRequest, db: 
 
     try:
         email_service.send_password_reset_code(user.email, codigo, user.nombre)
-    except Exception:
+    except Exception as e:
+        import traceback
+        print("--- ERROR ENVIANDO EMAIL DE RECUPERACIÓN ---")
+        print(f"Detalle del error: {e}")
+        traceback.print_exc()
         codigo_recuperacion.estado = "ERROR_ENVIO"
         db.commit()
         raise HTTPException(status_code=500, detail="No se pudo enviar el correo de recuperacion")
