@@ -13,16 +13,19 @@ SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 SMTP_FROM_NAME = os.getenv("SMTP_FROM_NAME", "NuevaSchool")
 SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", SMTP_USER)
 RESET_CODE_EXPIRE_MINUTES = int(os.getenv("RESET_CODE_EXPIRE_MINUTES", 10))
+DEVELOPMENT_EMAIL_OVERRIDE = os.getenv("DEVELOPMENT_EMAIL_OVERRIDE")
 
 
 def send_password_reset_code(to_email: str, code: str, user_name: str) -> None:
     if not all([SMTP_HOST, SMTP_USER, SMTP_PASSWORD, SMTP_FROM_EMAIL]):
         raise RuntimeError("Configuracion SMTP incompleta")
 
+    recipient = DEVELOPMENT_EMAIL_OVERRIDE if DEVELOPMENT_EMAIL_OVERRIDE else to_email
+
     message = EmailMessage()
     message["Subject"] = "Codigo de recuperacion de contrasena - NuevaSchool"
     message["From"] = f"{SMTP_FROM_NAME} <{SMTP_FROM_EMAIL}>"
-    message["To"] = to_email
+    message["To"] = recipient
 
     message.set_content(
         f"Hola {user_name},\n\n"
