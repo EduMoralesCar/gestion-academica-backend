@@ -33,6 +33,7 @@ def obtener_curso_o_404(db: Session, curso_id: str):
 
 @router.get("/", response_model=List[schemas.MatriculaResponse])
 def obtener_matriculas(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
+    validar_admin(current_user, "ver todas las matrículas")
     return db.query(models.Matricula).all()
 
 

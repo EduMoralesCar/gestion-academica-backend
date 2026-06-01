@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from .. import models, schemas, auth, database
 
@@ -10,12 +10,16 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=List[schemas.UserResponse])
-def obtener_usuarios(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
+def obtener_usuarios(rol: Optional[models.UserRole] = None, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
     # Solo el Admin o Docentes pueden ver la lista general de usuarios
     if current_user.rol not in [models.UserRole.ADMIN, models.UserRole.DOCENTE]:
         raise HTTPException(status_code=403, detail="No tienes permisos para ver los usuarios")
     
-    usuarios = db.query(models.User).all()
+    query = db.query(models.User)
+    if rol:
+        query = query.filter(models.User.rol == rol)
+
+    usuarios = query.all()
     return usuarios
 
 @router.put("/{user_id}", response_model=schemas.UserResponse)
