@@ -11,12 +11,34 @@ router = APIRouter(
 
 @router.get("/", response_model=List[schemas.UserResponse])
 def obtener_usuarios(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
-    # Solo el Admin o Docentes pueden ver la lista general de usuarios
-    if current_user.rol not in [models.UserRole.ADMIN, models.UserRole.DOCENTE]:
-        raise HTTPException(status_code=403, detail="No tienes permisos para ver los usuarios")
-    
-    usuarios = db.query(models.User).all()
-    return usuarios
+    # ADMIN ve todos los usuarios
+    if current_user.rol == models.UserRole.ADMIN:
+        return db.query(models.User).all()
+
+    # DOCENTE ve los estudiantes de los cursos que dicta
+    if current_user.rol == models.UserRole.DOCENTE:
+        curso_ids = [asignacion.curso_id for asignacion in current_user.asignaciones_docente]
+        if not curso_ids:
+            return [current_user]
+
+        estudiantes = (
+            db.query(models.User)
+            .join(models.Matricula, models.User.id == models.Matricula.estudiante_id)
+            .filter(models.Matricula.curso_id.in_(curso_ids))
+            .distinct()
+            .all()
+        )
+
+        # Asegurar que el docente siempre vea su propio registro
+        usuarios = [current_user]
+        usuarios.extend([estudiante for estudiante in estudiantes if estudiante.id != current_user.id])
+        return usuarios
+
+    # ESTUDIANTE solo ve su propio perfil
+    if current_user.rol == models.UserRole.ESTUDIANTE:
+        return [current_user]
+
+    raise HTTPException(status_code=403, detail="No tienes permisos para ver los usuarios")
 
 @router.put("/{user_id}", response_model=schemas.UserResponse)
 def actualizar_usuario(user_id: str, user: schemas.UserBase, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
