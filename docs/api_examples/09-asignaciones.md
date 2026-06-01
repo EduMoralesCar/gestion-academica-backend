@@ -5,6 +5,11 @@
 ### GET `/api/asignaciones/`
 *Requiere Cabecera: `Authorization: Bearer <access_token>`*
 
+**Notas:**
+- Los estudiantes no pueden consultar esta ruta.
+- Los docentes ven solo sus propias asignaciones.
+- Los administradores ven todas las asignaciones.
+
 **Respuesta Exitosa (200 OK):**
 ```json
 [
@@ -39,6 +44,11 @@
   "fecha_asignacion": "2026-05-31T15:15:00Z"
 }
 ```
+
+**Errores posibles:**
+- `403 Forbidden` si el usuario autenticado no es administrador.
+- `404 Not Found` si `docente_id` o `curso_id` no existen.
+- `400 Bad Request` si el `docente_id` corresponde a un usuario que no es docente.
 
 ---
 
