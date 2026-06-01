@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, cursos, usuarios, matriculas, tareas, asistencias, entregas, notas, asignaciones, contenidos
+from app.routers import auth, cursos, usuarios, matriculas, tareas, asistencias, entregas, notas, asignaciones, contenidos, cursos_estudiante
 
 app = FastAPI(
     title="NuevaSchool API",
@@ -11,7 +11,7 @@ app = FastAPI(
 # Configuración de CORS para permitir al frontend conectarse
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permitir cualquier origen por ahora
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -32,3 +32,4 @@ app.include_router(entregas.router)
 app.include_router(notas.router)
 app.include_router(asignaciones.router)
 app.include_router(contenidos.router)
+app.include_router(cursos_estudiante.router)
