@@ -12,7 +12,13 @@ router = APIRouter(
 
 @router.get("/", response_model=List[schemas.NotaResponse])
 def obtener_notas(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
-    return db.query(models.Nota).all()
+    if current_user.rol == models.UserRole.ADMIN:
+        return db.query(models.Nota).all()
+    elif current_user.rol == models.UserRole.DOCENTE:
+        cursos_ids = [c.curso_id for c in current_user.asignaciones_docente]
+        return db.query(models.Nota).join(models.Matricula).filter(models.Matricula.curso_id.in_(cursos_ids)).all()
+    else:
+        return db.query(models.Nota).join(models.Matricula).filter(models.Matricula.estudiante_id == current_user.id).all()
 
 @router.post("/", response_model=schemas.NotaResponse)
 def registrar_nota(nota: schemas.NotaBase, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
@@ -20,6 +26,9 @@ def registrar_nota(nota: schemas.NotaBase, db: Session = Depends(database.get_db
     if current_user.rol not in [models.UserRole.DOCENTE, models.UserRole.ADMIN]:
         raise HTTPException(status_code=403, detail="No tienes permisos para registrar notas. Solo docentes o administradores.")
         
+    if nota.calificacion < 1.0 or nota.calificacion > 20.0:
+        raise HTTPException(status_code=400, detail="La calificación debe estar entre 1 y 20")
+
     nueva_nota = models.Nota(
         id=str(uuid.uuid4()),
         matricula_id=nota.matricula_id,
@@ -41,6 +50,9 @@ def actualizar_nota(nota_id: str, nota: schemas.NotaBase, db: Session = Depends(
     if not db_nota:
         raise HTTPException(status_code=404, detail="Nota no encontrada")
         
+    if nota.calificacion < 1.0 or nota.calificacion > 20.0:
+        raise HTTPException(status_code=400, detail="La calificación debe estar entre 1 y 20")
+
     db_nota.matricula_id = nota.matricula_id
     db_nota.tipo = nota.tipo
     db_nota.calificacion = nota.calificacion
