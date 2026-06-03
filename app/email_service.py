@@ -25,13 +25,15 @@ RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 def send_password_reset_code(to_email: str, code: str, user_name: str) -> None:
     recipient = DEVELOPMENT_EMAIL_OVERRIDE if DEVELOPMENT_EMAIL_OVERRIDE else to_email
 
-    subject = "Codigo de recuperacion de contrasena - NuevaSchool"
+    subject = f"[{to_email}] Código de recuperación de contraseña - NuevaSchool" if DEVELOPMENT_EMAIL_OVERRIDE else "Código de recuperación de contraseña - NuevaSchool"
+    dest_info = f"Este correo fue solicitado originalmente para la cuenta ficticia: {to_email}\n\n" if DEVELOPMENT_EMAIL_OVERRIDE else ""
     content = (
         f"Hola {user_name},\n\n"
-        f"Tu codigo de recuperacion es: {code}\n\n"
-        f"Este codigo vence en {RESET_CODE_EXPIRE_MINUTES} minutos. "
+        f"{dest_info}"
+        f"Tu código de recuperación es: {code}\n\n"
+        f"Este código vence en {RESET_CODE_EXPIRE_MINUTES} minutos. "
         "Si no solicitaste este cambio, ignora este correo.\n\n"
-        "Soporte de Nueva School"
+        "Soporte de NuevaSchool"
     )
 
     # 1. Resend HTTP API (Puerto 443 - Nunca bloqueado en la nube)
