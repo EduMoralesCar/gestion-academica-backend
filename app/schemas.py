@@ -13,6 +13,7 @@ class UserBase(BaseModel):
     nombre: str
     apellido: str
     rol: UserRole
+    profilePicture: Optional[str] = None
     
     # Campos opcionales según el rol
     codigo: Optional[str] = None
@@ -101,6 +102,7 @@ class AsignacionDocenteResponse(AsignacionDocenteCreate):
 class CursoResponse(CursoBase):
     id: str
     createdAt: datetime
+    docente_id: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -285,6 +287,10 @@ class EntregaBase(BaseModel):
         }
     }
 
+class EntregaUpdate(BaseModel):
+    calificacion: Optional[float] = Field(None, ge=1.0, le=20.0, description="La calificación debe estar entre 1 y 20")
+    comentarios: Optional[str] = None
+
 class EntregaResponse(EntregaBase):
     id: str
     estudiante_id: str
@@ -297,7 +303,7 @@ class EntregaResponse(EntregaBase):
 class NotaBase(BaseModel):
     matricula_id: str
     tipo: str
-    calificacion: float
+    calificacion: float = Field(..., ge=1.0, le=20.0, description="La calificación debe estar entre 1 y 20")
     peso: float
 
     model_config = {
