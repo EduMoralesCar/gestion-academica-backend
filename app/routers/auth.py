@@ -42,6 +42,7 @@ def registrar_usuario(user: schemas.UserCreate, db: Session = Depends(database.g
         nombre=user.nombre,
         apellido=user.apellido,
         rol=user.rol,
+        profilePicture=user.profilePicture,
         codigo=user.codigo,
         carrera=user.carrera,
         ciclo=user.ciclo,

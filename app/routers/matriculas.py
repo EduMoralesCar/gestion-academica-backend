@@ -33,8 +33,13 @@ def obtener_curso_o_404(db: Session, curso_id: str):
 
 @router.get("/", response_model=List[schemas.MatriculaResponse])
 def obtener_matriculas(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
-    validar_admin(current_user, "ver todas las matrículas")
-    return db.query(models.Matricula).all()
+    if current_user.rol == models.UserRole.ADMIN:
+        return db.query(models.Matricula).all()
+    elif current_user.rol == models.UserRole.DOCENTE:
+        cursos_ids = [c.curso_id for c in current_user.asignaciones_docente]
+        return db.query(models.Matricula).filter(models.Matricula.curso_id.in_(cursos_ids)).all()
+    else:
+        return db.query(models.Matricula).filter(models.Matricula.estudiante_id == current_user.id).all()
 
 
 @router.get("/curso/{curso_id}/estudiantes", response_model=schemas.CursoEstudiantesResponse)
@@ -128,3 +133,15 @@ def retirar_estudiante_de_curso(curso_id: str, estudiante_id: str, db: Session =
         raise HTTPException(status_code=404, detail="Matrícula activa no encontrada")
 
     return matriculas_service.retirar_matricula(db, matricula)
+
+@router.delete("/{matricula_id}", response_model=schemas.MatriculaResponse)
+def eliminar_matricula(matricula_id: str, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
+    validar_admin(current_user, "eliminar matrícula")
+
+    matricula = db.query(models.Matricula).filter(models.Matricula.id == matricula_id).first()
+    if not matricula:
+        raise HTTPException(status_code=404, detail="Matrícula no encontrada")
+
+    db.delete(matricula)
+    db.commit()
+    return matricula

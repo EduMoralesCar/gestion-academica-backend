@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import auth, cursos, usuarios, matriculas, tareas, asistencias, entregas, notas, asignaciones, contenidos, cursos_estudiante
 
@@ -7,6 +7,23 @@ app = FastAPI(
     description="Backend de Sistema de Gestión Académica NuevaSchool",
     version="1.0.0"
 )
+
+# Middleware para normalizar la barra diagonal final sin redirecciones 307
+@app.middleware("http")
+async def normalizar_barra_final_middleware(request: Request, call_next):
+    path = request.url.path
+    parts = path.split("/")
+    # Si la ruta es de listado API (ej: /api/usuarios tiene 2 segmentos),
+    # no es de autenticación, no termina con '/' y no tiene extensión de archivo
+    if (path.startswith("/api") and 
+        not path.startswith("/api/auth") and 
+        len(parts) == 3 and 
+        not path.endswith("/") and 
+        "." not in parts[-1]):
+        # Modificamos el path en el scope de ASGI internamente para que FastAPI
+        # resuelva la ruta con '/' sin emitir un 307 Redirect al cliente (evita perder cabeceras)
+        request.scope["path"] = path + "/"
+    return await call_next(request)
 
 # Configuración de CORS para permitir al frontend conectarse
 app.add_middleware(
