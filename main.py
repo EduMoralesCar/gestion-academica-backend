@@ -1,6 +1,11 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from app.database import engine
+from app.models import Base
 from app.routers import auth, cursos, usuarios, matriculas, tareas, asistencias, entregas, notas, asignaciones, contenidos, cursos_estudiante
+
+# Crear las tablas en la base de datos si no existen
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="NuevaSchool API",
