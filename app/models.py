@@ -55,6 +55,12 @@ class Curso(Base):
     zoom_link = Column(String, nullable=True)
     createdAt = Column(DateTime(timezone=True), server_default=func.now())
 
+    @property
+    def docente_id(self):
+        if self.docentes:
+            return self.docentes[0].docente_id
+        return None
+
     # Relaciones
     docentes = relationship("AsignacionDocente", back_populates="curso")
     matriculas = relationship("Matricula", back_populates="curso")

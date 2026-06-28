@@ -24,8 +24,8 @@ def obtener_usuarios(rol: Optional[models.UserRole] = None, db: Session = Depend
 
 @router.put("/{user_id}", response_model=schemas.UserResponse)
 def actualizar_usuario(user_id: str, user: schemas.UserBase, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
-    if current_user.rol != models.UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail="Solo los administradores pueden actualizar usuarios")
+    if current_user.rol != models.UserRole.ADMIN and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="No tienes permisos para actualizar este usuario")
         
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if not db_user:
@@ -34,13 +34,17 @@ def actualizar_usuario(user_id: str, user: schemas.UserBase, db: Session = Depen
     db_user.email = user.email
     db_user.nombre = user.nombre
     db_user.apellido = user.apellido
-    db_user.rol = user.rol
-    db_user.codigo = user.codigo
-    db_user.carrera = user.carrera
-    db_user.ciclo = user.ciclo
-    db_user.especialidad = user.especialidad
-    db_user.departamento = user.departamento
-    db_user.nivel_acceso = user.nivel_acceso
+    
+    if current_user.rol == models.UserRole.ADMIN:
+        db_user.rol = user.rol
+        db_user.codigo = user.codigo
+        db_user.carrera = user.carrera
+        db_user.ciclo = user.ciclo
+        db_user.especialidad = user.especialidad
+        db_user.departamento = user.departamento
+        db_user.nivel_acceso = user.nivel_acceso
+        
+    db_user.profilePicture = user.profilePicture
     
     db.commit()
     db.refresh(db_user)

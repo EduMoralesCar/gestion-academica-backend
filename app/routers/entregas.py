@@ -12,10 +12,16 @@ router = APIRouter(
 
 @router.get("/", response_model=List[schemas.EntregaResponse])
 def obtener_entregas(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
-    """Obtener todas las entregas (solo admin y docentes)"""
-    if current_user.rol not in [models.UserRole.ADMIN, models.UserRole.DOCENTE]:
-        raise HTTPException(status_code=403, detail="No tienes permisos para ver entregas")
-    return db.query(models.Entrega).all()
+    """Obtener entregas según el rol"""
+    if current_user.rol == models.UserRole.ADMIN:
+        return db.query(models.Entrega).all()
+    elif current_user.rol == models.UserRole.DOCENTE:
+        # Cursos asignados al docente
+        cursos_ids = [c.curso_id for c in current_user.asignaciones_docente]
+        return db.query(models.Entrega).join(models.Tarea).filter(models.Tarea.curso_id.in_(cursos_ids)).all()
+    else:
+        # Entregas del propio estudiante
+        return db.query(models.Entrega).filter(models.Entrega.estudiante_id == current_user.id).all()
 
 @router.post("/", response_model=schemas.EntregaResponse)
 def crear_entrega(entrega: schemas.EntregaBase, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
@@ -27,7 +33,8 @@ def crear_entrega(entrega: schemas.EntregaBase, db: Session = Depends(database.g
         id=str(uuid.uuid4()),
         tarea_id=entrega.tarea_id,
         estudiante_id=current_user.id,
-        archivo=entrega.archivo
+        archivo=entrega.archivo,
+        calificacion=0.0
     )
     db.add(nueva_entrega)
     db.commit()
@@ -46,6 +53,26 @@ def actualizar_entrega(entrega_id: str, entrega: schemas.EntregaBase, db: Sessio
 
     db_entrega.tarea_id = entrega.tarea_id
     db_entrega.archivo = entrega.archivo
+
+    db.commit()
+    db.refresh(db_entrega)
+    return db_entrega
+
+@router.put("/{entrega_id}/calificar", response_model=schemas.EntregaResponse)
+def calificar_entrega(entrega_id: str, payload: schemas.EntregaUpdate, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
+    """Calificar una entrega (docentes y admins)"""
+    if current_user.rol not in [models.UserRole.DOCENTE, models.UserRole.ADMIN]:
+        raise HTTPException(status_code=403, detail="Solo docentes pueden calificar entregas")
+
+    db_entrega = db.query(models.Entrega).filter(models.Entrega.id == entrega_id).first()
+    if not db_entrega:
+        raise HTTPException(status_code=404, detail="Entrega no encontrada")
+
+    if payload.calificacion is not None and (payload.calificacion < 1.0 or payload.calificacion > 20.0):
+        raise HTTPException(status_code=400, detail="La calificación debe estar entre 1 y 20")
+
+    db_entrega.calificacion = payload.calificacion
+    db_entrega.comentarios = payload.comentarios
 
     db.commit()
     db.refresh(db_entrega)
