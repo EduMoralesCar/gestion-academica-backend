@@ -74,8 +74,8 @@ def seed():
                 "apellido": "Rodríguez",
                 "rol": models.UserRole.ESTUDIANTE,
                 "password": "estudiante123",
-                "codigo": "E001",
-                "carrera": "Ingeniería Informática",
+                "codigo": "U26001",
+                "carrera": "Ingeniería de Sistemas e Informática",
                 "ciclo": 5,
                 "estado": "activo",
             },
@@ -86,8 +86,8 @@ def seed():
                 "apellido": "Martínez",
                 "rol": models.UserRole.ESTUDIANTE,
                 "password": "estudiante123",
-                "codigo": "E002",
-                "carrera": "Ingeniería Informática",
+                "codigo": "U26002",
+                "carrera": "Ingeniería de Sistemas e Informática",
                 "ciclo": 5,
                 "estado": "activo",
             },
@@ -98,8 +98,8 @@ def seed():
                 "apellido": "López",
                 "rol": models.UserRole.ESTUDIANTE,
                 "password": "estudiante123",
-                "codigo": "E003",
-                "carrera": "Ingeniería Informática",
+                "codigo": "U26003",
+                "carrera": "Ingeniería de Sistemas e Informática",
                 "ciclo": 5,
                 "estado": "activo",
             },
@@ -110,8 +110,8 @@ def seed():
                 "apellido": "Soto",
                 "rol": models.UserRole.ESTUDIANTE,
                 "password": "estudiante123",
-                "codigo": "E004",
-                "carrera": "Administración",
+                "codigo": "U26004",
+                "carrera": "Administración de Empresas",
                 "ciclo": 3,
                 "estado": "activo",
             },
@@ -122,8 +122,8 @@ def seed():
                 "apellido": "Quispe",
                 "rol": models.UserRole.ESTUDIANTE,
                 "password": "estudiante123",
-                "codigo": "E005",
-                "carrera": "Ingeniería Informática",
+                "codigo": "U26005",
+                "carrera": "Ingeniería de Sistemas e Informática",
                 "ciclo": 7,
                 "estado": "activo",
             },
@@ -134,8 +134,8 @@ def seed():
                 "apellido": "Flores",
                 "rol": models.UserRole.ESTUDIANTE,
                 "password": "estudiante123",
-                "codigo": "E006",
-                "carrera": "Administración",
+                "codigo": "U26006",
+                "carrera": "Administración de Empresas",
                 "ciclo": 3,
                 "estado": "activo",
             },
@@ -146,8 +146,8 @@ def seed():
                 "apellido": "Ruiz",
                 "rol": models.UserRole.ESTUDIANTE,
                 "password": "estudiante123",
-                "codigo": "E007",
-                "carrera": "Ingeniería Informática",
+                "codigo": "U26007",
+                "carrera": "Ingeniería de Sistemas e Informática",
                 "ciclo": 5,
                 "estado": "activo",
             },
@@ -158,8 +158,8 @@ def seed():
                 "apellido": "Mendoza",
                 "rol": models.UserRole.ESTUDIANTE,
                 "password": "estudiante123",
-                "codigo": "E008",
-                "carrera": "Administración",
+                "codigo": "U26008",
+                "carrera": "Administración de Empresas",
                 "ciclo": 2,
                 "estado": "activo",
             },
@@ -170,8 +170,8 @@ def seed():
                 "apellido": "Condori",
                 "rol": models.UserRole.ESTUDIANTE,
                 "password": "estudiante123",
-                "codigo": "E009",
-                "carrera": "Ingeniería Informática",
+                "codigo": "U26009",
+                "carrera": "Ingeniería de Sistemas e Informática",
                 "ciclo": 5,
                 "estado": "activo",
             },
@@ -182,8 +182,8 @@ def seed():
                 "apellido": "Torres",
                 "rol": models.UserRole.ESTUDIANTE,
                 "password": "estudiante123",
-                "codigo": "E010",
-                "carrera": "Administración",
+                "codigo": "U26010",
+                "carrera": "Administración de Empresas",
                 "ciclo": 4,
                 "estado": "activo",
             }
@@ -219,6 +219,7 @@ def seed():
                 "docente_id": "docente-1",
                 "ciclo": 1,
                 "modalidad": models.ModalidadCurso.presencial,
+                "carreras": "Ingeniería de Sistemas e Informática,Ingeniería de Software"
             },
             {
                 "id": "curso-2",
@@ -228,6 +229,7 @@ def seed():
                 "docente_id": "docente-1",
                 "ciclo": 3,
                 "modalidad": models.ModalidadCurso.presencial,
+                "carreras": "Ingeniería de Sistemas e Informática,Ingeniería de Software"
             },
             {
                 "id": "curso-3",
@@ -237,6 +239,7 @@ def seed():
                 "docente_id": "docente-1",
                 "ciclo": 5,
                 "modalidad": models.ModalidadCurso.presencial,
+                "carreras": "Ingeniería de Sistemas e Informática,Ingeniería de Software"
             },
             {
                 "id": "curso-4",
@@ -246,6 +249,7 @@ def seed():
                 "docente_id": "docente-2",
                 "ciclo": 1,
                 "modalidad": models.ModalidadCurso.presencial,
+                "carreras": "Ingeniería de Sistemas e Informática,Ingeniería de Software,Administración de Empresas,Contabilidad"
             },
             {
                 "id": "curso-5",
@@ -255,6 +259,7 @@ def seed():
                 "docente_id": "docente-3",
                 "ciclo": 1,
                 "modalidad": models.ModalidadCurso.presencial,
+                "carreras": "Ingeniería de Sistemas e Informática,Ingeniería de Software,Administración de Empresas,Contabilidad"
             }
         ]
 
@@ -265,7 +270,8 @@ def seed():
                 codigo=c["codigo"],
                 creditos=c["creditos"],
                 ciclo=c["ciclo"],
-                modalidad=c["modalidad"]
+                modalidad=c["modalidad"],
+                carreras=c["carreras"]
             )
             db.add(nuevo_curso)
             # Crear asignacion del docente

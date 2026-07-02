@@ -54,6 +54,7 @@ class Curso(Base):
     modalidad = Column(SQLEnum(ModalidadCurso))
     zoom_link = Column(String, nullable=True)
     createdAt = Column(DateTime(timezone=True), server_default=func.now())
+    carreras = Column(String, nullable=True)
 
     @property
     def docente_id(self):

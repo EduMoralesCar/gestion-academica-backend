@@ -29,7 +29,8 @@ def crear_curso(curso: schemas.CursoBase, db: Session = Depends(database.get_db)
         creditos=curso.creditos,
         ciclo=curso.ciclo,
         modalidad=curso.modalidad,
-        zoom_link=curso.zoom_link
+        zoom_link=curso.zoom_link,
+        carreras=curso.carreras
     )
     db.add(nuevo_curso)
     db.commit()
@@ -51,6 +52,7 @@ def actualizar_curso(curso_id: str, curso: schemas.CursoBase, db: Session = Depe
     db_curso.ciclo = curso.ciclo
     db_curso.modalidad = curso.modalidad
     db_curso.zoom_link = curso.zoom_link
+    db_curso.carreras = curso.carreras
     
     db.commit()
     db.refresh(db_curso)

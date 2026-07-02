@@ -61,6 +61,7 @@ class CursoBase(BaseModel):
     ciclo: int
     modalidad: str
     zoom_link: Optional[str] = None
+    carreras: Optional[str] = None
 
 class CursoCreate(CursoBase):
     model_config = {
