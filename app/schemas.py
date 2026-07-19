@@ -14,6 +14,7 @@ class UserBase(BaseModel):
     apellido: str
     rol: UserRole
     profilePicture: Optional[str] = None
+    face_embedding: Optional[str] = None
     
     # Campos opcionales según el rol
     codigo: Optional[str] = None
@@ -323,3 +324,10 @@ class NotaResponse(NotaBase):
     fecha: datetime
     class Config:
         from_attributes = True
+
+class FaceRegisterRequest(BaseModel):
+    embedding: List[float]
+
+class FaceLoginRequest(BaseModel):
+    email: EmailStr
+    embedding: List[float]

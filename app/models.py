@@ -38,6 +38,7 @@ class User(Base):
     departamento = Column(String, nullable=True) # Docente
     nivel_acceso = Column(String, nullable=True) # Admin
     estado = Column(String, default='activo') # Todos
+    face_embedding = Column(String, nullable=True) # Todos (Guardado como JSON string)
 
     # Relaciones
     asignaciones_docente = relationship("AsignacionDocente", back_populates="docente")

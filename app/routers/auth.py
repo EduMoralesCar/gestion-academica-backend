@@ -165,3 +165,71 @@ def restablecer_password(request: schemas.ResetPasswordRequest, db: Session = De
 
     db.commit()
     raise HTTPException(status_code=400, detail="Codigo invalido o expirado")
+
+@router.post("/registrar-rostro")
+def registrar_rostro(
+    request: schemas.FaceRegisterRequest,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    import json
+    # Convertir lista de decimales a string JSON
+    embedding_str = json.dumps(request.embedding)
+    current_user.face_embedding = embedding_str
+    db.commit()
+    return {"message": "Rostro registrado con éxito"}
+
+@router.post("/login-facial")
+def login_facial(
+    request: schemas.FaceLoginRequest,
+    db: Session = Depends(database.get_db)
+):
+    import json
+    import math
+    
+    # Buscar al usuario por correo
+    user = db.query(models.User).filter(models.User.email == request.email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+    if not user.face_embedding:
+        raise HTTPException(
+            status_code=400, 
+            detail="Este usuario no tiene un rostro registrado. Por favor, inicia sesión con contraseña y regístralo desde tu perfil."
+        )
+        
+    try:
+        stored_embedding = json.loads(user.face_embedding)
+    except Exception:
+        raise HTTPException(status_code=500, detail="Error al decodificar el rostro guardado en el servidor")
+        
+    # Calcular distancia euclidiana
+    if len(request.embedding) != len(stored_embedding):
+        raise HTTPException(status_code=400, detail="Dimensiones del vector facial incorrectas")
+        
+    distance = math.sqrt(sum((x - y) ** 2 for x, y in zip(request.embedding, stored_embedding)))
+    
+    # Umbral de comparación. Normalmente < 0.60 para face-api.js, usaremos 0.55 para mayor seguridad
+    threshold = 0.55
+    if distance > threshold:
+        raise HTTPException(status_code=401, detail="Reconocimiento facial fallido: el rostro no coincide")
+        
+    # Generar Token JWT
+    access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = auth.create_access_token(
+        data={"sub": user.email, "role": user.rol},
+        expires_delta=access_token_expires
+    )
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "nombre": user.nombre,
+            "apellido": user.apellido,
+            "rol": user.rol,
+            "profilePicture": user.profilePicture
+        }
+    }

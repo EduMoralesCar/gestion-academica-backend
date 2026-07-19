@@ -45,7 +45,9 @@ def actualizar_usuario(user_id: str, user: schemas.UserBase, db: Session = Depen
         db_user.nivel_acceso = user.nivel_acceso
         
     db_user.profilePicture = user.profilePicture
-    
+    if user.face_embedding is not None:
+        db_user.face_embedding = user.face_embedding
+        
     db.commit()
     db.refresh(db_user)
     return db_user
